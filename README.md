@@ -27,4 +27,7 @@ This code helps to analyze and optimize the space-time profit from production of
 - estimated mAb space-time yield [mg / (L ⋅ d)] with 95% prediction intervals.
 
 ### Choice of Batches
-I had to chose 30 datasets between 1029 batch datasets
+Choosing 30 datasets from a source of 1029 batch datasets to represent the economic limits of testing.
+I elected to choose 30 primarily from the center of the dataset as this is where I expected the optimal conditions to be.
+The values for low glucose would result in low growth which is likely to make them suboptimal, and high values are linearly more costly without performance necessarily increasing at the same rate.
+Low initial biomass means a potentially longer lag phase, 
