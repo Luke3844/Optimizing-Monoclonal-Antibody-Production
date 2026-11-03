@@ -42,8 +42,6 @@ At each step, the model predicts the next state from the previous *p* states; pr
 For each batch, the predicted mAb trajectory is combined with the batch's initial conditions to compute cost, revenue, space-time profit STP(*t*) and space-time yield STY(*t*) at every time point. 
 The harvest time t* is the time that maximizes STP; the harvest time maximizing STY is recorded separately. 
 Results are ranked by STP* and exported to figures/stp_summary.csv. 
-The one-step model predicts only a single 8-hour advance; it cannot answer "when should I harvest?" or "which initial condition is best?" without being rolled forward. 
-Recursive forecasting is the bridge between the supervised regression model and the economic objective, and it is also where any modeling error is amplified — hence the mAb_end_pred vs mAb_end_obs column in the summary table, which serves as the accuracy check for the multi-step forecast.
 This stage produces the deliverable of the project: a ranked recommendation of initial conditions and harvest times under the stated economics. 
 It also produces the diagnostic evidence (end-of-run predicted vs. observed mAb) needed to judge whether the recommendation is trustworthy.
 
