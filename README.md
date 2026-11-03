@@ -67,6 +67,12 @@ The polynomial model with p=3 had the white noise with the least variation and w
 All of the kNN models had an increase in variance at the end of the time cycle as can be seen in the figures folder under the various "figure_white_noise_knn_p0#.png" images.
 Among the polynomial models, p03 displays the smallest prediction intervals,
 
+The cubic *p* = 3 model's main advantage is stability under recursion: the smooth, bounded form does not diverge the way k-NN can. 
+It is also interpretable, since fitted coefficients describe marginal lagged effects, and it captures curvature (such as mAb acceleration once VCD is established) that a linear VAR cannot.
+
+Its limitations mirror these strengths. The cubic form may not match true dynamics near the edges of the design space, where extrapolation is smooth but not necessarily correct. 
+Predicting all seven variables simultaneously compounds errors through the feedback loop. 
+
 ### Analysis of Initial Conditions
 STY = *m*(*t*)/(*t*/24 + 1) is maximised by early harvest and ignores cost; STP = (1000·*m*(*t*) − cost)/(*t*/24 + 1) penalises expensive conditions. 
 The dominant finding is that STP* is driven by cost, not productivity, because titres are nearly flat in time. 
