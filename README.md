@@ -63,8 +63,20 @@ The values for low glucose would result in low growth which is likely to make th
 Low initial biomass means a potentially longer lag phase, and higher means large increase to cost.
 
 ### Analysis of Chosen Model
-As can be seen from the figures lablled "white_noise" in the "figures" folder, all of the knn models have an increasing white noise over time, which means there is something that they are missing.
-The polynomial prediction models by contrast, have no such increase or decrease over time. 
+The process is modelled as a vector autoregression of order *p*: the state at time *t*, comprising all seven measured variables, is predicted from the states at *t*−1, …, *t*−*p*. 
+This embedding converts a multivariate time-series forecasting problem into a standard supervised regression problem, which allows the use of well-understood scikit-learn estimators.
+
+Two estimator families were compared: polynomial regression (degrees 1–3 applied to the scaled lagged features, followed by ordinary least squares) and k-nearest-neighbour regression (*k* = 1–5, uniform and distance weighting). 
+Both were wrapped in a pipeline with a custom StandardScalerVAR(p) preprocessor, which computes per-variable mean and standard deviation across all lag blocks and tiles them so that every lag of the same variable is scaled identically. 
+This is essential because glucose (~5 mM) and VCD (~10⁶ cells/mL) differ by six orders of magnitude; a naively fitted scaler would be dominated by VCD and would distort the regression.
+
+Polynomial regression was expected to be the safer choice for this application. The model is used recursively — predictions are fed back as inputs for 84 consecutive steps to reach the harvest time — so it must remain stable far from any single training point. 
+A low-degree polynomial cannot produce the wild extrapolations that an unconstrained model might, whereas k-NN has no extrapolation capability at all and degenerates once a predicted state leaves the training manifold. 
+The comparison against k-NN therefore tests whether the richer local structure of the data justifies the extrapolation risk.
+
+Hyperparameters were searched by GridSearchCV with GroupKFold(n_splits=3), using negative root-mean-squared error as the scoring function. 
+Grouped folds were used because samples from the same batch are serially correlated; random splitting would leak information from later to earlier time points of the same batch and inflate the apparent accuracy. 
+The hyperparameter grid was deliberately modest (polynomial degree ≤ 3, *k* ≤ 5, autoregressive order ≤ 5) because the design has only 30 batches and roughly 2,500 samples; higher-capacity models would overfit the batch-level structure.
 
 ### Analysis of Initial Condition
 
