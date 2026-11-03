@@ -75,13 +75,13 @@ Predicting all seven variables simultaneously compounds errors through the feedb
 
 ### Analysis of Initial Conditions
 STY = *m*(*t*)/(*t*/24 + 1) is maximised by early harvest and ignores cost; STP = (1000·*m*(*t*) − cost)/(*t*/24 + 1) penalises expensive conditions. 
-The dominant finding is that STP* is driven by cost, not productivity, because titres are nearly flat in time. 
-The five highest-STP batches all cost $464–633/L; the five lowest cost $766–944/L. Mean STP* falls monotonically across cost quartiles: ≈$72.6 below $600/L, ≈$66.6 at $600–700, ≈$55.3 at $700–800, and ≈$39.9 above $800/L.
+The dominant finding is that STP* is driven by cost.
+The five highest-STP batches all cost $464–633/L; the five lowest cost $766–944/L. Mean STP* (maximum STP) falls monotonically across cost quartiles: ≈$72.6 below $600/L, ≈$66.6 at $600–700, ≈$55.3 at $700–800, and ≈$39.9 above $800/L.
 
 Batch 0523 is the clearest illustration: highest VCD (1.34×10⁶ cells/mL), highest cost ($944/L), one of the highest predicted mAb values at *t** (1.160 mg/L), yet last of all 30 batches. 
 Batch 0955 (36 mM glucose) has the highest predicted mAb (1.211 mg/L) but ranks only 13th because glucose alone costs $360/L. High-glutamine batches (0535, 0556) rank low for the same reason. 
 VCD and glutamine above the centre, and glucose above ~20 mM, are cost-dominated.
 
-STY-optimal times cluster at 16–32 h with predicted mAb of 0.4–0.7 mg/L; these are an artefact of the cubic model flattening the early mAb curve and are not physically credible.
+STY-optimal times cluster at 16–32 h with predicted mAb of 0.4–0.7 mg/L; these are an artifact of the cubic model flattening the early mAb curve and are not physically credible.
 
 
