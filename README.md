@@ -30,4 +30,12 @@ This code helps to analyze and optimize the space-time profit from production of
 Choosing 30 datasets from a source of 1029 batch datasets to represent the economic limits of testing.
 I elected to choose 30 primarily from the center of the dataset as this is where I expected the optimal conditions to be.
 The values for low glucose would result in low growth which is likely to make them suboptimal, and high values are linearly more costly without performance necessarily increasing at the same rate.
-Low initial biomass means a potentially longer lag phase, 
+Low initial biomass means a potentially longer lag phase, and higher means large increase to cost.
+
+
+
+### Analysis of Chosen Model
+Justify chosen model
+
+### Analysis of Initial Condition
+Analyze effects of different initial conditions
