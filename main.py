@@ -59,12 +59,11 @@ alpha = 1 - prediction_interval
 x_left = np.min(df.loc[:, "Time [h]"]) - 1
 x_right = np.max(df.loc[:, "Time [h]"]) + 1
 
+# ===============
+# Model Training
+# ===============
 for model_type in model_types:
-
-    # Evaluate NVAR models with different numbers of lagged values.
     for p in range(1, p_max + 1):
-
-        # Generate the lagged-value dataset used to train NVAR(p)
         x_lag, x_cur, t_cur, b_cur = sf.generate_x_lag_cur_var(p=p, batch_ids=batch_ids, df=df, features=features)
 
         # Create the model
@@ -153,7 +152,7 @@ for model_type in model_types:
         ax.set_xlim(left=x_left, right=x_right)
         ax.set_ylim(bottom=-1.05 * y_max, top=1.05 * y_max)
 
-        fig.savefig(os.path.join("figures", f"figure_07_{model_type}_p{p:02d}.png"))
+        fig.savefig(os.path.join("figures", f"figure_white_noise_{model_type}_p{p:02d}.png"))
         plt.close(fig)
 
         if model_type == "poly":

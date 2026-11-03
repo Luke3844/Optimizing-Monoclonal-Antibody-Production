@@ -33,7 +33,8 @@ Low initial biomass means a potentially longer lag phase, and higher means large
 
 
 ### Analysis of Chosen Model
-Justify chosen model
+As can be seen from the figures lablled "white_noise" in the "figures" folder, all of the knn models have an increasing white noise over time, which means there is something that they are missing.
+The polynomial prediction models by contrast, have no such increase or decrease over time. 
 
 ### Analysis of Initial Condition
 Analyze effects of different initial conditions
