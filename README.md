@@ -28,7 +28,24 @@ The first *p* rows of each batch are consumed as history; the remaining rows bec
 The result is x_lag (n_samples × 7p), x_cur (n_samples × 7), t_cur, and b_cur (batch labels for each sample).
 
 ### Model Training
+The program loops over two model families — polynomial regression with PolynomialFeatures and k-nearest-neighbours regression — and over *p* ∈ {1,…,5}. For each (family, *p*) pair, it constructs a scikit-learn pipeline consisting of StandardScalerVAR(p) followed by the estimator. 
+The custom scaler computes per-variable mean and standard deviation across all lag blocks and tiles them so that every lag of the same variable is scaled identically; this is essential because glucose and VCD differ by six orders of magnitude and a naive scaler would be dominated by VCD. 
+GroupKFold(n_splits=3) ensures folds are batch-disjoint. GridSearchCV tunes the polynomial degree (1–3) or the number of neighbours (1–5) and the weighting scheme, scoring by negative root-mean-squared error. 
+The white-noise diagnostic in this stage tests whether the model has learned the one-step dynamics well enough that residuals are structureless. 
+If they are not, no downstream forecast can be trusted. The comparison across two model families guards against committing to a single inductive bias: polynomial regression captures smooth global trends but cannot represent regime changes; k-NN captures local dynamics but extrapolates poorly outside the training manifold.
+The best (family, p, hyperparameters) triple is retained as best_overall_model, which is the object used for recursive forecasting in the final stage. 
+The residual plots saved to figures/figure_white_noise_*.png are the primary evidence that the model is adequate.
 
+### Space Time Profit Analysis
+For each of the 30 batches, the fitted pipeline is used by simulate_batch to recursively forecast the seven variables forward from the batch's observed initial state. 
+At each step, the model predicts the next state from the previous *p* states; predictions are fed back as inputs until the full 672-hour time grid is filled. 
+For each batch, the predicted mAb trajectory is combined with the batch's initial conditions to compute cost, revenue, space-time profit STP(*t*) and space-time yield STY(*t*) at every time point. 
+The harvest time t* is the time that maximizes STP; the harvest time maximizing STY is recorded separately. 
+Results are ranked by STP* and exported to figures/stp_summary.csv. 
+The one-step model predicts only a single 8-hour advance; it cannot answer "when should I harvest?" or "which initial condition is best?" without being rolled forward. 
+Recursive forecasting is the bridge between the supervised regression model and the economic objective, and it is also where any modeling error is amplified — hence the mAb_end_pred vs mAb_end_obs column in the summary table, which serves as the accuracy check for the multi-step forecast.
+This stage produces the deliverable of the project: a ranked recommendation of initial conditions and harvest times under the stated economics. 
+It also produces the diagnostic evidence (end-of-run predicted vs. observed mAb) needed to judge whether the recommendation is trustworthy.
 
 ## Analysis
 ### Overview
