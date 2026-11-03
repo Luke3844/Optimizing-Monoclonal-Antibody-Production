@@ -8,6 +8,7 @@
 # ============
 
 import pandas as pd
+import numpy as np
 import os
 import src.functions as sf  # This allows you to access functions from functions.py using sf.function_name()
 from src.classes import Batch  # This allows you to import individual Classes from classes.py
@@ -26,12 +27,11 @@ for batch_id in batch_ids:
     df.insert(0, "batch_id", int(batch_id))  # add as leftmost column
     dfs.append(df)
 
-df_all = pd.concat(dfs, ignore_index=True)
+df = pd.concat(dfs, ignore_index=True)
 
-# =======================
-# Setup Model Parameters
-# =======================
-
+# ==================================
+# Setup Model And Analysis Parameters
+# ===================================
 p_max = 5
 cv_splits = 3
 poly_degree_max = 3
@@ -40,3 +40,10 @@ model_types = ["poly", "knn"]
 param_grid_poly = dict(polynomialfeatures__degree=[i for i in range(1, poly_degree_max + 1)])
 param_grid_knn = dict(kneighborsregressor__n_neighbors=[i for i in range(1, knn_k_max + 1)],
                       kneighborsregressor__weights=["uniform", "distance"])
+features = df.columns[2:]
+feature_plot = "VCD [cells/mL]"
+idx_fp = np.argmax(features == feature_plot)
+units = feature_plot.split(" [")[-1][:-1]
+prediction_interval = 0.95
+alpha = 1 - prediction_interval
+
