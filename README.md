@@ -54,9 +54,9 @@ It also produces the diagnostic evidence (end-of-run predicted vs. observed mAb)
 - recommended initial viable cell density [cells/mL]:  
 - recommended harvest time [d]: 4
 - estimated cell culture cost [$/L]: 400000
-- estimated cell culture value at harvest [$/L] with 95% prediction intervals:
-- estimated space-time profit [$ / (L ⋅ d)] with 95% prediction intervals: 
-- estimated mAb space-time yield [mg / (L ⋅ d)] with 95% prediction intervals:
+- estimated cell culture value at harvest [$/L] with 95% prediction intervals: 867.79 (706.78, 971.71)
+- estimated space-time profit [$ / (L ⋅ d)] with 95% prediction intervals: 86.53 (52.02, 108.79)
+- estimated mAb space-time yield [mg / (L ⋅ d)] with 95% prediction intervals: 0.227 (0.151, 0.208)
 
 ### Choice of Experimental Batches
 Choosing 30 datasets from a source of 1029 batch datasets to represent the economic limits of testing.

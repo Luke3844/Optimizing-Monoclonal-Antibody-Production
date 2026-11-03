@@ -174,6 +174,18 @@ for model_type in model_types:
 p_best = best_overall_p
 idx_mab = list(features).index("mAb [mg/L]")
 
+multi_resid = {}
+for bid in batch_ids:
+    df_b = df[df["Batch ID"] == bid].sort_values("Time [h]").reset_index(drop=True)
+    times_b = df_b["Time [h]"].to_numpy(dtype=float)
+    observed_b = df_b[features].to_numpy(dtype=float)
+    sim_b = sf.simulate_batch(
+        best_overall_model, observed_b[:p_best], times_b, p_best, list(features)
+    )
+    multi_resid[bid] = (times_b, sim_b - observed_b)
+
+q = alpha / 2.0
+
 stp_results = []
 for bid in batch_ids:
     df_b = df[df["Batch ID"] == bid].sort_values("Time [h]").reset_index(drop=True)
@@ -201,6 +213,29 @@ for bid in batch_ids:
     i_stp = int(np.argmax(stp_curve))
     i_sty = int(np.argmax(sty_curve))
 
+    t_star = float(times[i_stp])
+    resid_at_tstar = []
+    for other_bid in batch_ids:
+        t_other, r_other = multi_resid[other_bid]
+        j = int(np.argmin(np.abs(t_other - t_star)))
+        resid_at_tstar.append(r_other[j, idx_mab])
+    resid_at_tstar = np.asarray(resid_at_tstar)
+
+    n = resid_at_tstar.shape[0]
+    n_mean = float(np.mean(resid_at_tstar))
+    n_sd = float(np.std(resid_at_tstar, ddof=1))
+    tq = stats.t.isf(q=q, df=n - 1)
+
+    mab_point = float(mab_pred[i_stp]) + n_mean
+    mab_lo = mab_point - tq * n_sd
+    mab_hi = mab_point + tq * n_sd
+
+    denom = t_star / 24.0 + 1.0
+    stp_lo = (1000.0 * mab_lo - cost) / denom
+    stp_hi = (1000.0 * mab_hi - cost) / denom
+    sty_lo = mab_lo / denom
+    sty_hi = mab_hi / denom
+
     stp_results.append({
         "batch_id": bid,
         "G0": G0, "Q0": Q0, "V0": V0,
@@ -215,6 +250,14 @@ for bid in batch_ids:
         "mAb_end_obs": df_b["mAb [mg/L]"].iloc[-1],
         "mAb_end_pred": mab_pred[-1],
         "STP_end": stp_curve[-1],
+        "mAb_pi_lo": mab_lo,
+        "mAb_pi_hi": mab_hi,
+        "value_pi_lo": 1000.0 * mab_lo,
+        "value_pi_hi": 1000.0 * mab_hi,
+        "STP_pi_lo": stp_lo,
+        "STP_pi_hi": stp_hi,
+        "STY_pi_lo": sty_lo,
+        "STY_pi_hi": sty_hi,
     })
 
 stp_df = pd.DataFrame(stp_results).sort_values("STP_star", ascending=False).reset_index(drop=True)
