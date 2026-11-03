@@ -56,13 +56,18 @@ It also produces the diagnostic evidence (end-of-run predicted vs. observed mAb)
 - estimated space-time profit [$ / (L ⋅ d)] with 95% prediction intervals: 86.53 (52.02, 108.79)
 - estimated mAb space-time yield [mg / (L ⋅ d)] with 95% prediction intervals: 0.227 (0.151, 0.208)
 
+The top five STP* values span only $80.0–86.5/(L·d) (an 8% spread) and their prediction intervals overlap almost entirely, so the ranking among them is not highly notable. 
+
 ### Choice of Experimental Batches
 Choosing 30 datasets from a source of 1029 batch datasets to represent the economic limits of testing.
 I elected to choose 30 primarily from the center of the dataset as this is where I expected the optimal conditions to be.
 The values for low glucose would result in low growth which is likely to make them suboptimal, and high values are linearly more costly without performance necessarily increasing at the same rate.
 Low initial biomass means a potentially longer lag phase, and higher means large increase to cost.
 
-### Analysis of Chosen Model
+The 30 batches were allocated as 20 core points (glucose 15–25 mM, glutamine 3–5 mM, VCD 0.6–1.0×10⁶), 6 shoulder points with one factor at an outer level, and 4 boundary points at the true extremes for multiple variables at once. 
+The limitation is that each (G, Q, V) triple is represented by a single batch, so pure replication error cannot be estimated, which would have been possible if I chose repeat datasets.
+
+### Analysis of Chosen Model and Comparison
 The polynomial model with p=3 had the white noise with the least variation and without long term trends. 
 All of the kNN models had an increase in variance at the end of the time cycle as can be seen in the figures folder under the various "figure_white_noise_knn_p0#.png" images.
 Among the polynomial models, p03 displays the smallest prediction intervals,
