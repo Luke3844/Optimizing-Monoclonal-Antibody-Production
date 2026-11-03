@@ -21,13 +21,13 @@ def culture_value(mAb_final):
 def profit(cost, value):
     return value - cost
 
-def space_time_profit(sum_profit, harvest_time):
+def space_time_profit(harvest_profit, harvest_time):
     harvest_time_d = harvest_time/24.0
-    return sum_profit / (harvest_time + downtime)
+    return harvest_profit / (harvest_time_d + downtime)
 
 def space_time_yield(mAb_final, harvest_time):
     harvest_time_d = harvest_time/24.0
-    return mAb_final / (harvest_time + downtime)
+    return mAb_final / (harvest_time_d + downtime)
 
 def generate_x_lag_cur_var(p, batch_ids, df, features, col_batch="Batch ID", col_time="Time [h]"):
     x_lag = []
