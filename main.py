@@ -16,17 +16,14 @@ from src.constants import *  # This imports all constants from constants.py
 
 ### Dataset Imports
 batch_ids = [
-    "0343", "0367", "0391", "0349", "0364", "0493",
-    "0511", "0514", "0517", "0535", "0496", "0532",
-    "0643", "0661", "0679", "0658", "0637", "0385",
-    "0685", "0490", "0220", "0808", "0472", "0556",
-    "0508", "0520", "0073", "0955", "0451", "0523",
-]
+    "0343", "0367", "0391", "0349", "0364", "0493", "0511", "0514", "0517", "0535", "0496", "0532", "0643", "0661", "0679", "0658", "0637", "0385",
+    "0685", "0490", "0220", "0808", "0472", "0556", "0508", "0520", "0073", "0955", "0451", "0523",
+] #Choices justified in readme
 
 dfs = []
-for bid in batch_ids:
-    df = pd.read_csv(os.path.join("datasets", f"batch_{bid}.csv"))
-    df.insert(0, "batch_id", bid)  # add as leftmost column
+for batch_id in batch_ids:
+    df = pd.read_csv(os.path.join("datasets", f"batch_{batch_id}.csv"))
+    df.insert(0, "batch_id", int(batch_id))  # add as leftmost column
     dfs.append(df)
 
 df_all = pd.concat(dfs, ignore_index=True)
