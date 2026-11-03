@@ -5,8 +5,6 @@ This code helps to analyze and optimize the space-time profit from production of
 - Selected optimal experiments to analyze from limited data.
 - Built python code to create a variety of models and provide data from them.
 - Analyzed created models for accuracy and economic efficiency.
-- Hi
-- Hi
 
 ## Environment
 - Python Version 3.14.7

@@ -10,6 +10,15 @@
 import pandas as pd
 import numpy as np
 import os
+from matplotlib import pyplot as plt
+from matplotlib.ticker import MultipleLocator
+from scipy import stats
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import GroupKFold, GridSearchCV
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
+from src.classes import StandardScalerVAR
 import src.functions as sf  # This allows you to access functions from functions.py using sf.function_name()
 from src.classes import Batch  # This allows you to import individual Classes from classes.py
 from src.constants import *  # This imports all constants from constants.py
