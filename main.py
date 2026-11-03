@@ -20,11 +20,11 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import PolynomialFeatures
 from src.classes import StandardScalerVAR
 import src.functions as sf  # This allows you to access functions from functions.py using sf.function_name()
-from src.classes import Batch  # This allows you to import individual Classes from classes.py
-from src.constants import *  # This imports all constants from constants.py
 
+# ================
+# Dataset Imports
+# ================
 
-### Dataset Imports
 batch_ids = [
     "0343", "0367", "0391", "0349", "0364", "0493", "0511", "0514", "0517", "0535", "0496", "0532", "0643", "0661", "0679", "0658", "0637", "0385",
     "0685", "0490", "0220", "0808", "0472", "0556", "0508", "0520", "0073", "0955", "0451", "0523",
