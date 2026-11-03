@@ -81,3 +81,45 @@ def generate_x_lag_cur_var(p, batch_ids, df, features, col_batch="Batch ID", col
     b_cur = np.concatenate(b_cur, axis=0)
 
     return x_lag, x_cur, t_cur, b_cur
+
+def simulate_batch(model, initial_rows, times, p, features):
+    """
+    Recursively forecast process variables forward from an initial state.
+
+    Parameters
+    ----------
+    model        : fitted sklearn pipeline (StandardScalerVAR + estimator) whose
+                   predict() expects a raw lagged design row of length n_var*p.
+    initial_rows : array-like, shape (>= p, n_var). The first p rows are used as
+                   the seed history; if more than p rows are supplied, the extra
+                   leading rows are treated as known and included in the output.
+    times        : array-like of time points (length T). The simulation produces
+                   one prediction per time point.
+    p            : autoregressive order (must match the model's scaler p).
+    features     : list of column names, used only to determine n_var.
+
+    Returns
+    -------
+    preds : ndarray, shape (T, n_var)
+        Row i is the predicted (or, for the seed rows, known) state at times[i].
+    """
+    n_var = len(features)
+    initial_rows = np.asarray(initial_rows, dtype=float)
+
+    if initial_rows.shape[0] < p:
+        raise ValueError(f"Need at least p={p} seed rows, got {initial_rows.shape[0]}")
+
+    seed = initial_rows[:p]                    # first p rows are the seed
+    preds = [row for row in initial_rows]      # keep any known leading rows
+
+    history = [row for row in seed]            # ordered oldest -> newest
+
+    for _ in range(len(times) - len(preds)):
+        # Build lag vector x(t-1), x(t-2), ..., x(t-p)
+        lag_vec = np.concatenate(history[::-1]).reshape(1, -1)
+        x_next = model.predict(lag_vec)[0]
+        preds.append(x_next)
+        history.append(x_next)
+        history = history[-p:]
+
+    return np.array(preds)

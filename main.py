@@ -62,6 +62,12 @@ x_right = np.max(df.loc[:, "Time [h]"]) + 1
 # ===============
 # Model Training
 # ===============
+
+best_overall_score = -np.inf
+best_overall_model = None
+best_overall_p = None
+best_overall_type = None
+
 for model_type in model_types:
     for p in range(1, p_max + 1):
         x_lag, x_cur, t_cur, b_cur = sf.generate_x_lag_cur_var(p=p, batch_ids=batch_ids, df=df, features=features)
@@ -91,6 +97,13 @@ for model_type in model_types:
 
         # Fit the model
         model_gscv.fit(x_lag, x_cur, groups=b_cur)
+
+        score = model_gscv.best_score_  # negative RMSE, higher is better
+        if score > best_overall_score:
+            best_overall_score = score
+            best_overall_model = model_gscv.best_estimator_
+            best_overall_p = p
+            best_overall_type = model_type
 
         # Note: Here we predicted using the training data because we are evaluating whether the model was able to learn
         # the time series patterns in the dataset. We are NOT evaluating how well it generalizes to new data.
@@ -155,10 +168,85 @@ for model_type in model_types:
         fig.savefig(os.path.join("figures", f"figure_white_noise_{model_type}_p{p:02d}.png"))
         plt.close(fig)
 
-        if model_type == "poly":
-            best_degree = model_gscv.best_params_["polynomialfeatures__degree"]
-            print(f"{p = } | Degree: {best_degree}")
-        elif model_type == "knn":
-            best_n_neighbors = model_gscv.best_params_["kneighborsregressor__n_neighbors"]
-            best_weight = model_gscv.best_params_["kneighborsregressor__weights"]
-            print(f"{p = } | k={best_n_neighbors}, {best_weight}")
+# =====================================================
+# Space-Time Profit Analysis on Selected Batches
+# =====================================================
+p_best = best_overall_p
+idx_mab = list(features).index("mAb [mg/L]")
+
+stp_results = []
+for bid in batch_ids:
+    df_b = df[df["Batch ID"] == bid].sort_values("Time [h]").reset_index(drop=True)
+    times = df_b["Time [h]"].to_numpy(dtype=float)
+
+    G0 = df_b["Glucose [mM]"].iloc[0]
+    Q0 = df_b["Glutamine [mM]"].iloc[0]
+    V0 = df_b["VCD [cells/mL]"].iloc[0]
+    cost = sf.culture_cost(G0, Q0, V0)
+
+    init_rows = df_b[features].to_numpy(dtype=float)[:p_best]
+
+    sim = sf.simulate_batch(
+        model=best_overall_model,
+        initial_rows=init_rows,
+        times=times,
+        p=p_best,
+        features=list(features),
+    )
+
+    mab_pred = sim[:, idx_mab]
+    stp_curve = sf.space_time_profit(sf.culture_value(mab_pred) - cost, times)
+    sty_curve = sf.space_time_yield(mab_pred, times)
+
+    i_stp = int(np.argmax(stp_curve))
+    i_sty = int(np.argmax(sty_curve))
+
+    stp_results.append({
+        "batch_id": bid,
+        "G0": G0, "Q0": Q0, "V0": V0,
+        "cost": cost,
+        "t_star_h": times[i_stp],
+        "t_star_d": times[i_stp] / 24.0,
+        "mAb_at_t_star": mab_pred[i_stp],
+        "STP_star": stp_curve[i_stp],
+        "t_sty_star_h": times[i_sty],
+        "mAb_at_t_sty": mab_pred[i_sty],
+        "STY_star": sty_curve[i_sty],
+        "mAb_end_obs": df_b["mAb [mg/L]"].iloc[-1],
+        "mAb_end_pred": mab_pred[-1],
+        "STP_end": stp_curve[-1],
+    })
+
+stp_df = pd.DataFrame(stp_results).sort_values("STP_star", ascending=False).reset_index(drop=True)
+stp_df.to_csv(os.path.join("tables", "stp_summary.csv"), index=False)
+
+# Show the top condition
+best = stp_df.iloc[0]
+
+best_id = stp_df.iloc[0]["batch_id"]
+df_b = df[df["Batch ID"] == best_id].sort_values("Time [h]").reset_index(drop=True)
+times = df_b["Time [h]"].to_numpy(dtype=float)
+init_rows = df_b[features].to_numpy(dtype=float)[:p_best]
+sim = sf.simulate_batch(best_overall_model, init_rows, times, p_best, list(features))
+
+G0 = df_b["Glucose [mM]"].iloc[0]
+Q0 = df_b["Glutamine [mM]"].iloc[0]
+V0 = df_b["VCD [cells/mL]"].iloc[0]
+cost = sf.culture_cost(G0, Q0, V0)
+mab_pred = sim[:, idx_mab]
+stp_curve = sf.space_time_profit(sf.culture_value(mab_pred) - cost, times)
+t_d = times / 24.0
+
+fig, ax = plt.subplots(1, 1, figsize=((14.39 / 2.54), (12.09 / 2.54)), dpi=300, layout="constrained")
+ax.plot(t_d, stp_curve, color="tab:blue", label="Predicted STP")
+ax.axvline(t_d[int(np.argmax(stp_curve))], color="black", linestyle="--",
+           linewidth=0.8, label=f"t* = {t_d[int(np.argmax(stp_curve))]:.1f} d")
+ax.set_xlabel("Time [d]", fontsize=14)
+ax.set_ylabel("Space-Time Profit [$/(L·d)]", fontsize=14)
+ax.tick_params(axis="both", which="major", labelsize=12)
+ax.legend(fontsize=12)
+fig.savefig(os.path.join("figures", f"stp_curve_{best_id}.png"))
+plt.close(fig)
+
+mae_end = np.mean(np.abs(stp_df["mAb_end_pred"] - stp_df["mAb_end_obs"]))
+print(f"\nMulti-step end-of-run mAb MAE across batches: {mae_end:.2f} mg/L")
