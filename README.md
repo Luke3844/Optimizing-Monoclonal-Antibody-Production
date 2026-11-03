@@ -63,22 +63,19 @@ The values for low glucose would result in low growth which is likely to make th
 Low initial biomass means a potentially longer lag phase, and higher means large increase to cost.
 
 ### Analysis of Chosen Model
-The process is modelled as a vector autoregression of order *p*: the state at time *t*, comprising all seven measured variables, is predicted from the states at *t*−1, …, *t*−*p*. 
-This embedding converts a multivariate time-series forecasting problem into a standard supervised regression problem, which allows the use of well-understood scikit-learn estimators.
+The polynomial model with p=3 had the white noise with the least variation and without long term trends. 
+All of the kNN models had an increase in variance at the end of the time cycle as can be seen in the figures folder under the various "figure_white_noise_knn_p0#.png" images.
+Among the polynomial models, p03 displays the smallest prediction intervals,
 
-Two estimator families were compared: polynomial regression (degrees 1–3 applied to the scaled lagged features, followed by ordinary least squares) and k-nearest-neighbour regression (*k* = 1–5, uniform and distance weighting). 
-Both were wrapped in a pipeline with a custom StandardScalerVAR(p) preprocessor, which computes per-variable mean and standard deviation across all lag blocks and tiles them so that every lag of the same variable is scaled identically. 
-This is essential because glucose (~5 mM) and VCD (~10⁶ cells/mL) differ by six orders of magnitude; a naively fitted scaler would be dominated by VCD and would distort the regression.
+### Analysis of Initial Conditions
+STY = *m*(*t*)/(*t*/24 + 1) is maximised by early harvest and ignores cost; STP = (1000·*m*(*t*) − cost)/(*t*/24 + 1) penalises expensive conditions. 
+The dominant finding is that STP* is driven by cost, not productivity, because titres are nearly flat in time. 
+The five highest-STP batches all cost $464–633/L; the five lowest cost $766–944/L. Mean STP* falls monotonically across cost quartiles: ≈$72.6 below $600/L, ≈$66.6 at $600–700, ≈$55.3 at $700–800, and ≈$39.9 above $800/L.
 
-Polynomial regression was expected to be the safer choice for this application. The model is used recursively — predictions are fed back as inputs for 84 consecutive steps to reach the harvest time — so it must remain stable far from any single training point. 
-A low-degree polynomial cannot produce the wild extrapolations that an unconstrained model might, whereas k-NN has no extrapolation capability at all and degenerates once a predicted state leaves the training manifold. 
-The comparison against k-NN therefore tests whether the richer local structure of the data justifies the extrapolation risk.
+Batch 0523 is the clearest illustration: highest VCD (1.34×10⁶ cells/mL), highest cost ($944/L), one of the highest predicted mAb values at *t** (1.160 mg/L), yet last of all 30 batches. 
+Batch 0955 (36 mM glucose) has the highest predicted mAb (1.211 mg/L) but ranks only 13th because glucose alone costs $360/L. High-glutamine batches (0535, 0556) rank low for the same reason. 
+VCD and glutamine above the centre, and glucose above ~20 mM, are cost-dominated.
 
-Hyperparameters were searched by GridSearchCV with GroupKFold(n_splits=3), using negative root-mean-squared error as the scoring function. 
-Grouped folds were used because samples from the same batch are serially correlated; random splitting would leak information from later to earlier time points of the same batch and inflate the apparent accuracy. 
-The hyperparameter grid was deliberately modest (polynomial degree ≤ 3, *k* ≤ 5, autoregressive order ≤ 5) because the design has only 30 batches and roughly 2,500 samples; higher-capacity models would overfit the batch-level structure.
-
-### Analysis of Initial Condition
-
+STY-optimal times cluster at 16–32 h with predicted mAb of 0.4–0.7 mg/L; these are an artefact of the cubic model flattening the early mAb curve and are not physically credible.
 
 
