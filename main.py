@@ -33,7 +33,7 @@ batch_ids = [
 dfs = []
 for batch_id in batch_ids:
     df = pd.read_csv(os.path.join("datasets", f"batch_{batch_id}.csv"))
-    df.insert(0, "batch_id", int(batch_id))  # add as leftmost column
+    df.insert(0, "Batch ID", batch_id)  # add as leftmost column
     dfs.append(df)
 
 df = pd.concat(dfs, ignore_index=True)
@@ -65,7 +65,7 @@ for model_type in model_types:
     for p in range(1, p_max + 1):
 
         # Generate the lagged-value dataset used to train NVAR(p)
-        x_lag, x_cur, t_cur, b_cur = generate_x_lag_cur_var(p=p, batch_ids=batch_ids, df=df, features=features)
+        x_lag, x_cur, t_cur, b_cur = sf.generate_x_lag_cur_var(p=p, batch_ids=batch_ids, df=df, features=features)
 
         # Create the model
         if model_type == "poly":

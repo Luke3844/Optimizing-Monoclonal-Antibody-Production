@@ -4,6 +4,7 @@
 # =======================================================================
 
 import numpy as np
+
 # Downtime between batches is one day
 downtime = 1
 
